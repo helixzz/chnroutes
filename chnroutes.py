@@ -18,6 +18,15 @@ def generate_ovpn(metric):
     print "Usage: Append the content of the newly created routes.txt to your openvpn config file," \
           " and also add 'max-routes %d', which takes a line, to the head of the file." % (len(results)+20)
 
+def generate_cidr():
+    results = fetch_ip_data()
+    rfile=open('chnroutes_cidr.txt','w')
+    for ip,_,mask2 in results:
+        route_item="%s/%s\n"%(ip,mask2)
+        rfile.write(route_item)
+    rfile.close()
+    print "CHNRoutes CIDR format generated and saved to chnroutes_cidr.txt."
+
 
 def generate_linux(metric):
     results = fetch_ip_data()
@@ -232,7 +241,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description="Generate routing rules for vpn.")
     parser.add_argument('-p','--platform',
                         dest='platform',
-                        default='openvpn',
+                        default='cidr',
                         nargs='?',
                         help="Target platforms, it can be openvpn, mac, linux," 
                         "win, android. openvpn by default.")
@@ -245,7 +254,9 @@ if __name__=='__main__':
     
     args = parser.parse_args()
     
-    if args.platform.lower() == 'openvpn':
+    if args.platform.lower() == 'cidr':
+        generate_cidr()
+    elif args.platform.lower() == 'openvpn':
         generate_ovpn(args.metric)
     elif args.platform.lower() == 'linux':
         generate_linux(args.metric)
